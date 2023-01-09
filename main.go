@@ -1,74 +1,36 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 )
 
-var m = map[rune]int{
-	'I': 1,
-	'V': 5,
-	'X': 10,
-	'L': 50,
-	'C': 100,
-	'D': 500,
-	'M': 1000,
+func romanToInt(s string) int {
+	rMap := map[string]int{"I": 1, "V": 5, "X": 10, "L": 50, "C": 100, "D": 500, "M": 1000}
+	result := 0
+	for k := range s {
+		if k < len(s)-1 && rMap[s[k:k+1]] < rMap[s[k+1:k+2]] {
+			result -= rMap[s[k:k+1]]
+		} else {
+			result += rMap[s[k:k+1]]
+		}
+	}
+	return result
 }
 
-func parseRoman(s string) (r int, err error) {
-	if s == "" {
-		return 0, errors.New("Empty string")
-	}
-	is := []rune(s) // easier to convert string up front
-	var c0 rune     // c0: roman character last read
-	var cv0 int     // cv0: value of cv
+func intToRoman(s int) (roman string) {
+	numbers := []int{1, 4, 5, 9, 10, 40, 50, 90, 100}
+	romans := []string{"I", "IV", "V", "IX", "X", "XL", "L", "XC", "C"}
+	index := len(romans) - 1
 
-	// the key to the algorithm is to process digits from right to left
-	for i := len(is) - 1; i >= 0; i-- {
-		// read roman digit
-		c := is[i]
-		k := c == '\u0305' // unicode overbar combining character
-		if k {
-			if i == 0 {
-				return 0, errors.New(
-					"Overbar combining character invalid at position 0")
-			}
-			i--
-			c = is[i]
+	for s > 0 {
+		for numbers[index] <= s {
+			roman += romans[index]
+			s -= numbers[index]
 		}
-		cv := m[c]
-		if cv == 0 {
-			if c == 0x0305 {
-				return 0, fmt.Errorf(
-					"Overbar combining character invalid at position %d", i)
-			} else {
-				return 0, fmt.Errorf(
-					"Character unrecognized as Roman digit: %c", c)
-			}
-		}
-		if k {
-			c = -c // convention indicating overbar
-			cv *= 1000
-		}
-
-		// handle cases of new, same, subtractive, changed, in that order.
-		switch {
-		default: // case 4: digit change
-			fallthrough
-		case c0 == 0: // case 1: no previous digit
-			c0 = c
-			cv0 = cv
-		case c == c0: // case 2: same digit
-		case cv*5 == cv0 || cv*10 == cv0: // case 3: subtractive
-			// handle next digit as new.
-			// a subtractive digit doesn't count as a previous digit.
-			c0 = 0
-			r -= cv  // subtract...
-			continue // ...instead of adding
-		}
-		r += cv // add, in all cases except subtractive
+		index--
 	}
-	return r, nil
+
+	return roman
 }
 
 func add(x, y int) int {
@@ -89,18 +51,14 @@ func div(x, y int) int {
 
 func main() {
 	// parse three numbers mentioned in task description
-	r := "X"
-	w := "V"
-	v, err := parseRoman(r)
-	if err != nil {
-		fmt.Println(err)
-	}
-	x, err := parseRoman(w)
-	if err != nil {
-		fmt.Println(err)
-	}
+	r := "V"
+	w := "VII"
+	v := romanToInt(r)
+	x := romanToInt(w)
+
 	fmt.Println(r, "==", v)
 	fmt.Println(w, "==", x)
+	fmt.Println(intToRoman(add(v, x)))
 	fmt.Println(add(v, x))
 	fmt.Println(sub(v, x))
 	fmt.Println(mul(v, x))
