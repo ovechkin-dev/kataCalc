@@ -71,14 +71,39 @@ func parseRoman(s string) (r int, err error) {
 	return r, nil
 }
 
+func add(x, y int) int {
+	return x + y
+}
+
+func sub(x, y int) int {
+	return x - y
+}
+
+func mul(x, y int) int {
+	return x * y
+}
+
+func div(x, y int) int {
+	return x / y
+}
+
 func main() {
 	// parse three numbers mentioned in task description
-	for _, r := range []string{"MCMXC", "MMVIII", "MDCLXVI"} {
-		v, err := parseRoman(r)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(r, "==", v)
-		}
+	r := "X"
+	w := "V"
+	v, err := parseRoman(r)
+	if err != nil {
+		fmt.Println(err)
 	}
+	x, err := parseRoman(w)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(r, "==", v)
+	fmt.Println(w, "==", x)
+	fmt.Println(add(v, x))
+	fmt.Println(sub(v, x))
+	fmt.Println(mul(v, x))
+	fmt.Println(div(v, x))
+
 }
