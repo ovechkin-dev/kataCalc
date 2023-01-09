@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 )
 
 func romanToInt(s string) int {
@@ -49,19 +53,71 @@ func div(x, y int) int {
 	return x / y
 }
 
-func main() {
-	// parse three numbers mentioned in task description
-	r := "V"
-	w := "VII"
-	v := romanToInt(r)
-	x := romanToInt(w)
+func calculation(strSplit []string, simbol string) (calc int, calcRoman string) {
+	roman := false
+	a, err := strconv.Atoi(strSplit[0])
+	if err != nil {
+		a = romanToInt(strSplit[0])
+		roman = true
+	}
+	b, err := strconv.Atoi(strSplit[1])
+	if err != nil {
+		b = romanToInt(strSplit[1])
+		roman = true
+	}
 
-	fmt.Println(r, "==", v)
-	fmt.Println(w, "==", x)
-	fmt.Println(intToRoman(add(v, x)))
-	fmt.Println(add(v, x))
-	fmt.Println(sub(v, x))
-	fmt.Println(mul(v, x))
-	fmt.Println(div(v, x))
+	switch simbol {
+	case "+":
+		calc = add(a, b)
+	case "-":
+		calc = sub(a, b)
+	case "*":
+		calc = mul(a, b)
+	case "/":
+		calc = div(a, b)
+	}
+	if roman {
+		calcRoman = intToRoman(calc)
+	} else {
+		calcRoman = ""
+	}
+	return calc, calcRoman
+}
+
+func calculationString(text string) (result int, resultRoman string) {
+
+	if strings.Contains(text, "+") {
+		result, resultRoman = calculation(strings.Split(text, "+"), "+")
+	}
+	if strings.Contains(text, "-") {
+		result, resultRoman = calculation(strings.Split(text, "-"), "-")
+	}
+	if strings.Contains(text, "*") {
+		result, resultRoman = calculation(strings.Split(text, "*"), "*")
+	}
+	if strings.Contains(text, "/") {
+		result, resultRoman = calculation(strings.Split(text, "/"), "/")
+	}
+	return result, resultRoman
+}
+
+func main() {
+
+	fmt.Println("Введите задачу")
+	reader := bufio.NewReader(os.Stdin)
+	text, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Println("Ошибка: ", err)
+	}
+	text = strings.TrimSpace(text)
+	//fmt.Println(text)
+
+	resultInt, resultRom := calculationString(text)
+
+	if resultRom == "" {
+		fmt.Println(resultInt)
+	} else {
+		fmt.Println(resultRom)
+	}
 
 }
