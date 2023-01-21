@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -53,17 +54,34 @@ func div(x, y int) int {
 	return x / y
 }
 
-func calculation(strSplit []string, simbol string) (calc int, calcRoman string) {
+func calculation(strSplit []string, simbol string) (calc int, calcRoman string, err error) {
 	roman := false
-	a, err := strconv.Atoi(strSplit[0])
-	if err != nil {
+
+	if len(strSplit) > 2 {
+		return len(strSplit), "", errors.New("Максимум одна операция")
+	}
+
+	a, err1 := strconv.Atoi(strSplit[0])
+	if err1 != nil {
 		a = romanToInt(strSplit[0])
 		roman = true
 	}
-	b, err := strconv.Atoi(strSplit[1])
-	if err != nil {
+	b, err2 := strconv.Atoi(strSplit[1])
+	if err2 != nil {
 		b = romanToInt(strSplit[1])
 		roman = true
+	}
+
+	if (err1 != nil && err2 == nil) || (err1 == nil && err2 != nil) {
+		return -1, "", errors.New("Некорректное выражение")
+	}
+
+	if a > 10 || b > 10 {
+		return -1, "", errors.New("Число больше 10")
+	}
+
+	if a < 1 || b < 1 {
+		return -1, "", errors.New("Число меньше 1")
 	}
 
 	switch simbol {
@@ -77,28 +95,32 @@ func calculation(strSplit []string, simbol string) (calc int, calcRoman string) 
 		calc = div(a, b)
 	}
 	if roman {
-		calcRoman = intToRoman(calc)
+		if calc < 1 {
+			return -1, "", errors.New("Римские числа. Результат меньше еденицы.")
+		} else {
+			calcRoman = intToRoman(calc)
+		}
 	} else {
 		calcRoman = ""
 	}
-	return calc, calcRoman
+	return calc, calcRoman, err
 }
 
-func calculationString(text string) (result int, resultRoman string) {
+func calculationString(text string) (result int, resultRoman string, err error) {
 
 	if strings.Contains(text, "+") {
-		result, resultRoman = calculation(strings.Split(text, "+"), "+")
+		result, resultRoman, err = calculation(strings.Split(text, "+"), "+")
 	}
 	if strings.Contains(text, "-") {
-		result, resultRoman = calculation(strings.Split(text, "-"), "-")
+		result, resultRoman, err = calculation(strings.Split(text, "-"), "-")
 	}
 	if strings.Contains(text, "*") {
-		result, resultRoman = calculation(strings.Split(text, "*"), "*")
+		result, resultRoman, err = calculation(strings.Split(text, "*"), "*")
 	}
 	if strings.Contains(text, "/") {
-		result, resultRoman = calculation(strings.Split(text, "/"), "/")
+		result, resultRoman, err = calculation(strings.Split(text, "/"), "/")
 	}
-	return result, resultRoman
+	return result, resultRoman, err
 }
 
 func main() {
@@ -109,15 +131,20 @@ func main() {
 	if err != nil {
 		fmt.Println("Ошибка: ", err)
 	}
-	text = strings.TrimSpace(text)
-	//fmt.Println(text)
+	text = strings.ReplaceAll(text, " ", "")
+	text = strings.ReplaceAll(text, "\r", "")
+	text = strings.ReplaceAll(text, "\n", "")
+	//	fmt.Println(text)
 
-	resultInt, resultRom := calculationString(text)
-
-	if resultRom == "" {
-		fmt.Println(resultInt)
+	resultInt, resultRom, err := calculationString(text)
+	if err != nil {
+		fmt.Println("Ошибка: ", err)
 	} else {
-		fmt.Println(resultRom)
+		if resultRom == "" {
+			fmt.Println(resultInt)
+		} else {
+			fmt.Println(resultRom)
+		}
 	}
 
 }
